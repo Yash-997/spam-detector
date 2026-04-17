@@ -88,16 +88,18 @@ def predict_route():
 
     try:
         label, confidence = predict(text)
-    except Exception:
-        return jsonify({"error": "Prediction failed"}), 500
+        save_result(text, label, confidence)
+        return jsonify({"result": label, "confidence": confidence})
 
-    save_result(text, label, confidence)
-    return jsonify({"result": label, "confidence": confidence})
+    except Exception as e:
+        print("ERROR:", e)
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
     init_db()
     ensure_data_file()
-    load_model()  # FIX: no retraining every time
+    load_model()  # make sure model.py retrains
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
